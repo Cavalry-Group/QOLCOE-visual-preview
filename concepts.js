@@ -39,7 +39,7 @@ document.querySelectorAll('[data-concept-service]').forEach((button, index) => {
     });
     list.hidden = !service.items?.length;
     const link = conceptModal.querySelector('[data-concept-link]');
-    link.href = `https://qolcoe-website.vercel.app/${service.link}`; link.textContent = service.cta;
+    link.hidden = false; link.href = `https://qolcoe-website.vercel.app/${service.link}`; link.textContent = service.cta;
     conceptModal.classList.add('is-open');
     conceptModal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('concept-modal-open');

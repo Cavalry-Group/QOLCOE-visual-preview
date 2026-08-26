@@ -2,6 +2,7 @@
   const model = document.querySelector('[data-signature-model]');
   const canvas = model?.querySelector('canvas');
   const buttons = [...(model?.querySelectorAll('[data-concept-service]') || [])];
+  const qualityCore = model?.querySelector('[data-quality-core]');
   if (!model || !canvas || !buttons.length) return;
 
   const context = canvas.getContext('2d');
@@ -17,6 +18,18 @@
   buttons.forEach((button, index) => {
     button.addEventListener('pointerenter', () => setActive(index));
     button.addEventListener('focus', () => setActive(index));
+  });
+  qualityCore?.addEventListener('click', () => {
+    const modal = document.querySelector('[data-concept-modal]');
+    if (!modal) return;
+    modal.querySelector('[data-concept-label]').textContent = 'At the heart of everything';
+    modal.querySelector('#concept-modal-title').textContent = 'Quality of life';
+    modal.querySelector('[data-concept-copy]').innerHTML = '<p>Quality of life is about more than meeting needs, it’s about helping people feel <strong>safe, valued, understood and in control of their lives</strong>.</p><p>Through our specialist services QOLCOE helps you build confident teams, improve practice and create environments where people can develop skills, relationships, independence and meaningful opportunities.</p><p><strong>Better support creates better outcomes, and ultimately, better lives.</strong></p>';
+    modal.querySelector('[data-concept-items]').hidden = true;
+    modal.querySelector('[data-concept-link]').hidden = true;
+    modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('concept-modal-open');
+    modal.querySelector('[data-concept-close]').focus();
   });
 
   const pointFor = (button) => {
