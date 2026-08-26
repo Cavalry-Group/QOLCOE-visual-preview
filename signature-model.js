@@ -40,11 +40,11 @@
 
     buttons.forEach((button, index) => {
       const target = pointFor(button), left = index % 2 === 0;
-      context.beginPath(); context.moveTo(cx + (left ? -74 : 74), cy);
+      context.beginPath(); context.moveTo(cx + (left ? -102 : 102), cy);
       context.bezierCurveTo(cx + (left ? -150 : 150), cy, target.x + (left ? 55 : -55), target.y, target.x, target.y);
       context.strokeStyle = index === active ? 'rgba(255,212,106,.62)' : 'rgba(204,250,248,.105)'; context.lineWidth = index === active ? 1.4 : 1; context.stroke();
       if (index === active) {
-        const progress = reducedMotion ? 1 : (time % 2.8) / 2.8, sx = cx + (left ? -74 : 74), ex = target.x;
+        const progress = reducedMotion ? 1 : (time % 2.5) / 2.5, sx = cx + (left ? -102 : 102), ex = target.x;
         const x = sx + (ex - sx) * progress, y = cy + (target.y - cy) * progress;
         const glow = context.createRadialGradient(x,y,0,x,y,13); glow.addColorStop(0,'rgba(255,212,106,1)'); glow.addColorStop(1,'rgba(255,212,106,0)');
         context.fillStyle=glow; context.beginPath(); context.arc(x,y,13,0,Math.PI*2); context.fill();
