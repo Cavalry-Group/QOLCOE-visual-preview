@@ -7,29 +7,37 @@
 
   const context = canvas.getContext('2d');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let width = 0, height = 0, ratio = 1, active = 0, start = performance.now();
+  let width = 0, height = 0, ratio = 1, active = 0, start = performance.now(), activeStartedAt = performance.now(), cycleTimer;
 
   const resize = () => {
     const rect = model.getBoundingClientRect(); ratio = Math.min(devicePixelRatio || 1, 2);
     width = rect.width; height = rect.height; canvas.width = width * ratio; canvas.height = height * ratio;
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
   };
-  const setActive = (index) => { active = index; buttons.forEach((button, i) => button.classList.toggle('is-active', i === index)); };
+  const setActive = (index) => {
+    active = index; activeStartedAt = performance.now();
+    buttons.forEach((button, i) => button.classList.toggle('is-active', i === index));
+    if (!reducedMotion) {
+      clearTimeout(cycleTimer);
+      cycleTimer = setTimeout(() => setActive((active + 1) % buttons.length), 5000);
+    }
+  };
   buttons.forEach((button, index) => {
     button.addEventListener('pointerenter', () => setActive(index));
     button.addEventListener('focus', () => setActive(index));
   });
   qualityCore?.addEventListener('click', () => {
-    const modal = document.querySelector('[data-concept-modal]');
+    const modal = document.querySelector('[data-concept-modal]') || document.querySelector('[data-service-modal]');
     if (!modal) return;
-    modal.querySelector('[data-concept-label]').textContent = 'At the heart of everything';
-    modal.querySelector('#concept-modal-title').textContent = 'Quality of life';
-    modal.querySelector('[data-concept-copy]').innerHTML = '<p>Quality of life is about more than meeting needs, it’s about helping people feel <strong>safe, valued, understood and in control of their lives</strong>.</p><p>Through our specialist services QOLCOE helps you build confident teams, improve practice and create environments where people can develop skills, relationships, independence and meaningful opportunities.</p><p><strong>Better support creates better outcomes, and ultimately, better lives.</strong></p>';
-    modal.querySelector('[data-concept-items]').hidden = true;
-    modal.querySelector('[data-concept-link]').hidden = true;
+    const isSiteModal = modal.matches('[data-service-modal]');
+    modal.querySelector(isSiteModal ? '[data-service-modal-label]' : '[data-concept-label]').textContent = 'At the heart of everything';
+    modal.querySelector(isSiteModal ? '#service-modal-title' : '#concept-modal-title').textContent = 'Quality of life';
+    modal.querySelector(isSiteModal ? '.service-modal__copy' : '[data-concept-copy]').innerHTML = '<p>Quality of life is about more than meeting needs, it’s about helping people feel <strong>safe, valued, understood and in control of their lives</strong>.</p><p>Through our specialist services QOLCOE helps you build confident teams, improve practice and create environments where people can develop skills, relationships, independence and meaningful opportunities.</p><p><strong>Better support creates better outcomes, and ultimately, better lives.</strong></p>';
+    modal.querySelector(isSiteModal ? '[data-service-modal-items]' : '[data-concept-items]').hidden = true;
+    modal.querySelector(isSiteModal ? '[data-service-modal-link]' : '[data-concept-link]').hidden = true;
     modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('concept-modal-open');
-    modal.querySelector('[data-concept-close]').focus();
+    document.body.classList.add(isSiteModal ? 'modal-open' : 'concept-modal-open');
+    modal.querySelector(isSiteModal ? '[data-close-service]' : '[data-concept-close]').focus();
   });
 
   const pointFor = (button) => {
@@ -57,7 +65,8 @@
       context.bezierCurveTo(cx + (left ? -150 : 150), cy, target.x + (left ? 55 : -55), target.y, target.x, target.y);
       context.strokeStyle = index === active ? 'rgba(255,212,106,.62)' : 'rgba(204,250,248,.105)'; context.lineWidth = index === active ? 1.4 : 1; context.stroke();
       if (index === active) {
-        const progress = reducedMotion ? 1 : (time % 2.5) / 2.5, sx = cx + (left ? -110 : 110), ex = target.x;
+        const rawProgress = reducedMotion ? 1 : Math.min((now - activeStartedAt) / 4000, 1);
+        const progress = rawProgress * rawProgress * (3 - 2 * rawProgress), sx = cx + (left ? -110 : 110), ex = target.x;
         const x = sx + (ex - sx) * progress, y = cy + (target.y - cy) * progress;
         const glow = context.createRadialGradient(x,y,0,x,y,13); glow.addColorStop(0,'rgba(255,212,106,1)'); glow.addColorStop(1,'rgba(255,212,106,0)');
         context.fillStyle=glow; context.beginPath(); context.arc(x,y,13,0,Math.PI*2); context.fill();
@@ -66,6 +75,5 @@
     requestAnimationFrame(draw);
   };
   new ResizeObserver(resize).observe(model); resize(); setActive(0);
-  if (!reducedMotion) setInterval(() => setActive((active + 1) % buttons.length), 3200);
   requestAnimationFrame(draw);
 })();
